@@ -95,7 +95,7 @@ employeeData.on("child_added", function(childSnapshot, prevChildKey){
 
 
 	// Add each train's data into the table
-	$("#trainTable > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDestination + "</td><td>" + trainFreq + "</td><td>" + trainMin + "</td>");
+	$("#trainTable > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDestination + "</td><td>" + trainMin + "</td><td>" + trainFreq + "</td><td>");
 
 });
 
