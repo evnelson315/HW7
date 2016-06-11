@@ -1,4 +1,4 @@
-var employeeData = new Firebase("https://shiningtimestation.firebaseio.com/");
+var trainData = new Firebase("https://shiningtimestation.firebaseio.com/");
 
 // 2. Button for adding Employees
 $("#addtrainBtn").on("click", function(){
@@ -6,24 +6,26 @@ $("#addtrainBtn").on("click", function(){
 	// Grabs user input
 	var trainName = $("#trainNameInput").val().trim();
 	var trainDestination = $("#trainDestinationInput").val().trim();
-	var trainFreq = $("#trainFreqInput").val().trim(); 
+	var trainTime = $("#trainTimeInput").val().trim(); 
 	var trainMin = $("#trainMinInput").val().trim();
+	var minutesToBoard;
 
 	// Creates local "temporary" object for holding train data
 	var newtrain = {
 		name:  trainName,
 		destination: trainDestination,
-		frequency: trainFreq,
+		initialTime: trainTime,
 		minutes: trainMin
+		 
 	}
 
 	// Uploads train data to the database
-	employeeData.push(newtrain);
+	trainData.push(newtrain);
 
 	// Logs everything to console
 	console.log(newtrain.name);
 	console.log(newtrain.destination);
-	console.log(newtrain.frequency);
+	console.log(newtrain.initialTime);
 	console.log(newtrain.minutes)
 
 	// Alert
@@ -32,7 +34,7 @@ $("#addtrainBtn").on("click", function(){
 	// Clears all of the text-boxes
 	$("#trainNameInput").val("");
 	$("#trainDestinationInput").val("");
-	$("#trainFreqInput").val("");
+	$("#trainTimeInput").val("");
 	$("#trainMinInput").val("");
 
 	// Prevents moving to new page
@@ -41,69 +43,59 @@ $("#addtrainBtn").on("click", function(){
 
 
 // 3. Create Firebase event for adding employee to the database and a row in the html when a user adds an entry
-employeeData.on("child_added", function(childSnapshot, prevChildKey){
+trainData.on("child_added", function(childSnapshot, prevChildKey){
 
 	console.log(childSnapshot.val());
 
 	// Store everything into a variable.
 	var trainName = childSnapshot.val().name;
 	var trainDestination = childSnapshot.val().destination;
-	var trainFreq = childSnapshot.val().frequency;
+	var trainTime = childSnapshot.val().initialTime;
 	var trainMin = childSnapshot.val().minutes;
 
 	// Employee Info
 	console.log(trainName);
 	console.log(trainDestination);
-	console.log(trainFreq);
+	console.log(trainTime);
 	console.log(trainMin);
 
-	// // Prettify the employee start
-	// var empStartPretty = moment.unix(empStart).format("MM/DD/YY");
 
-	// // Calculate the months worked using hardcore math
-	// // To calculate the months worked
-	// var empMonths = moment().diff(moment.unix(empStart, 'X'), "months");
-	// console.log(empMonths);
-		// // Assumptions
-		// var tFrequency = 3; 
-		// var firstTime = "03:30"; // Time is 3:30 AM
 
-		// // First Time (pushed back 1 year to make sure it comes before current time)
-		// var firstTimeConverted = moment(firstTime,"hh:mm").subtract(1, "years");
-		// console.log(firstTimeConverted);
 
-		// // Current Time
-		// var currentTime = moment();
-		// console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
+	// // To calculate the next train time:
 
-		// // Difference between the times
-		// var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
-		// console.log("DIFFERENCE IN TIME: " + diffTime);
+		// convert train start time to decimal (ex. 8:45am = 8.75)
+		// multiply train start time by 60 to get minutes ( 8. 75 x 60 = 525)
 
-		// // Time apart (remainder)
-		// var tRemainder = diffTime % tFrequency; 
-		// console.log(tRemainder);
+		// convert current  *military* time to decimal (ex. 17:30 = 17.5)
+		// multiply current military time by 60 to get minutes ( 17.5 x 60 = 1050)
 
-		// // Minute Until Train
-		// var tMinutesTillTrain = tFrequency - tRemainder;
-		// console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
+		// subtract train start time from current time to get "divisible minutes"
+		// 	1050 - 525 = 525min
 
-		// // Next Train
-		// var nextTrain = moment().add(tMinutesTillTrain, "minutes")
-		// console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"))
+
+		// divide "divisible minutes" by 60 to find out how many times it has run already
+
+		// 	525min / 60 = 8.75
+
+		// subtract the decimal from 1
+
+		// 	1 - .75
+
+		// then multiply by 60 to get time to minutesToBoard
+
+		// 	.25 x 60 = 15
+
+		// Add minutesToBoard to currentTime to get nextTrainTime
+
+		// in this case 15 minutes plus current time would make my next train come at 5:45pm
 
 
 
 	// Add each train's data into the table
-	$("#trainTable > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDestination + "</td><td>" + trainMin + "</td><td>" + trainFreq + "</td><td>");
+	$("#trainTable > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDestination + "</td><td>" + trainMin + "</td><td>" + trainTime + "</td>");
 
 });
 
 
-// Example Time Math
-// -----------------------------------------------------------------------------
-// Assume Employee start date of January 1, 2015
-// Assume current date is March 1, 2016
-
-// We know that this is 15 months.
-// Now we will create code in moment.js to confirm that any attempt we use mets this test case
+//
